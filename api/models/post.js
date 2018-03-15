@@ -15,7 +15,7 @@ const PostSchema = new mongoose.Schema({
   comments: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}],
   imgSrc: String,
   author: {type: mongoose.Schema.Types.ObjectId, ref: 'user'}, 
-  tags: [{type: String}]
+  tags: [String]
 }, {timestamps: true});
 
 PostSchema.plugin(uniqueValidator, {message: 'is already taken'});
@@ -25,9 +25,6 @@ PostSchema.pre('validate', function(next) {
     this.slugify()
   }
 
-  if (this.tag){
-    this.tag.split(",")
-  }
   next();
 });
 
@@ -36,7 +33,7 @@ PostSchema.methods.slugify = function() {
 }  
 
 
-// postSchema.methods.updateLikesCount = () => {
+// postSchema.methods.updateLikesCount = function() {
 //   const article = this;
 
 //   return 

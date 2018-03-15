@@ -1,10 +1,13 @@
 const router = require('express').Router();
 const multer = require('multer');
 
+const auth = require('../auth/auth');
+
 const Post = require('mongoose').model('post');
 
 const post = require('../controllers/post');
 const tags = require('../controllers/tags');
+const user = require('../controllers/users');
 
 // multer config
 const storage = multer.diskStorage({
@@ -66,5 +69,10 @@ router.param('comment', function(req, res, next, id) {
 });
 
 router.get('/:article/comments', post.getComments);
+
+router.get('/user', auth.required, user.getUser);
+router.post('/users', user.signUp)
+router.post('/users/login', user.login)
+router.put('/user', upload.single('imageSrc'), auth.required, user.updateUser)
 
 module.exports = router;

@@ -26,7 +26,6 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 
 app.use('/api', api);
-// app.use(require('./routes'));
 
 
 // handle error, pass message, set statusCode, and pass error object to the next middleware function

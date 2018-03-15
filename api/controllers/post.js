@@ -1,16 +1,10 @@
+const router = require('express').Router();
 const mongoose = require('mongoose');
-const Post = mongoose.model('post');
-const router = require('express').Router()
 
-router.param('post', (req, res, next, slug) => {
-  Post.findOne({slug: slug})
-  then(post => {
-    if(!post) {return res.sendStatus(404);}
-    req.post = post;
-    return next()
-  })
-  .catch(next)
-})
+const Post = mongoose.model('post');
+const Comment = mongoose.model('comment');
+
+
 
 module.exports.getPosts = (req, res, next) => {
   let query = {};
@@ -38,7 +32,8 @@ module.exports.getPosts = (req, res, next) => {
         .limit(Number(limit))
         .skip(Number(offset))
         .sort({createdAt: 'desc'})
-        .exec(), Post.count(query).exec()
+        .exec(), 
+      Post.count(query).exec()
     ])
     .then(results => {
       console.log(results)
@@ -54,7 +49,20 @@ module.exports.getPosts = (req, res, next) => {
 }
 
 module.exports.createPosts = (req, res, next) => {
-  const post = new Post(req.body);
+
+  console.log("[file]", req.file)
+  console.log("[body]", req.body)
+  let path = null
+  if(req.file) {
+    path = req.file.path
+  }
+
+  const post = new Post({
+    post: req.body.post,
+    title: req.body.title,
+    tags: req.body.tags,
+    imgSrc: path
+  });
   
   post
     .save()
@@ -68,4 +76,35 @@ module.exports.createPosts = (req, res, next) => {
       console.log(err)
       res.status(500).json(err);
     });
+}
+
+
+
+module.exports.getPost = (req, res, next) => {
+  Promise.all([])
+    .then(results => {
+      return res.json(results)
+    })
+    .catch(next);
+}
+
+module.exports.getComments = (req, res, next) => {
+  // create a new resolved promise
+  Promise.resolve()
+    .then(user => {
+      return req.post.populate({
+        path: 'comments',
+        options: {
+          sort: {
+            createdAt: 'desc'
+          }
+        }
+      }).execPopulate()
+        .then(article => {
+          return res.json({comments: req.article.comments.map(comment => {
+            return comment
+          })})
+        })
+        .catch(next);
+    })
 }

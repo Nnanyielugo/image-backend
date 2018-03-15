@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const slug = require('slug');
 
-const PostSchema = mongoose.Schema({
+const PostSchema = new mongoose.Schema({
   slug: {
     type: String,
     lowercase: true,
@@ -11,8 +11,11 @@ const PostSchema = mongoose.Schema({
   title: String,
   post: {
     type: String
-  }, 
-  tags: [String]
+  },
+  comments: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}],
+  imgSrc: String,
+  author: {type: mongoose.Schema.Types.ObjectId, ref: 'user'}, 
+  tags: [{type: String}]
 }, {timestamps: true});
 
 PostSchema.plugin(uniqueValidator, {message: 'is already taken'});
@@ -30,7 +33,7 @@ PostSchema.pre('validate', function(next) {
 
 PostSchema.methods.slugify = function() {
   this.slug = slug(this.title) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36)
-}
+}  
 
 
 // postSchema.methods.updateLikesCount = () => {

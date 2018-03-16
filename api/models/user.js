@@ -19,8 +19,9 @@ const UserSchema = new mongoose.Schema({
             index: true},
   bio: String,
   imageSrc: String,
-  // favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'post' }],
-  // following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'post' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+  // followees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
   hash: String,
   salt: String
 }, {timestamps: true});
@@ -61,6 +62,56 @@ UserSchema.methods.toAuthJSON = function() {
     bio: this.bio,
     imageSrc: this.imageSrc
   }
+}
+
+// return selected user properties to populate single post author field
+UserSchema.methods.toProfileJSONFor = function(user) {
+  return {
+    username: this.username,
+    bio: this.bio,
+    imageSrc: this.imageSrc,
+    following: user ? user.isFollowing(this._id) : false
+  }
+}
+
+UserSchema.methods.favorite = function(id){
+  if(this.favorites.indexOf(id) === -1){
+    this.favorites.unshift(id);
+    // this.favorites.push(id);
+  }
+
+  return this.save();
+}
+
+UserSchema.methods.unfavorite = function(id) {
+  this.favorites.remove(id);
+  return this.save;
+}
+
+UserSchema.methods.isFavorite = function(id) {
+  return this.favorites.some(function(favoriteId){
+    return favoriteId.toString() === id.toString();
+  })
+}
+
+UserSchema.methods.follow = function(id){
+  // if index of user id is less then zero (ie, not exist), push id into 'following' array
+  if(this.following.indexOf(id) === -1){
+    this.following.unshift(id);
+  }
+
+  return this.save()
+}
+
+UserSchema.methods.unfollow = function(id) {
+  this.following.remove(id);
+  return this.save()
+}
+
+UserSchema.methods.isFollowing = function(id) {
+  return this.following.some(function(followId){
+    return followId.toString() == id.toString();
+  });
 }
 
 const User = mongoose.model('user', UserSchema);

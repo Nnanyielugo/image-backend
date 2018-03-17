@@ -21,7 +21,8 @@ const UserSchema = new mongoose.Schema({
   imageSrc: String,
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'post' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
-  followersCount: {type: Number, default: 0},
+  followers: [{type: String}],
+  followerCount: {type: Number, default: 0},
   hash: String,
   salt: String
 }, {timestamps: true});
@@ -72,7 +73,9 @@ UserSchema.methods.toProfileJSONFor = function(user) {
     username: this.username,
     bio: this.bio,
     imageSrc: this.imageSrc,
-    following: user ? user.isFollowing(this._id) : false
+    following: user ? user.isFollowing(this._id) : false,
+    followers: this.followers,
+    followerCount: this.followerCount
   }
 }
 
@@ -85,15 +88,54 @@ UserSchema.methods.favorite = function(id){
   return this.save();
 }
 
-// UserSchema.methods.updateFollowersCount = function() {
-//   const user = this;
+UserSchema.methods.addFollower = function(profile, user) {
+  // const profile = this;
+console.log(profile.followers)
+  // return User
+    // .count({followers: {$in: [profile.id]}})
+    // .then(function(){
+      profile.followers.unshift(user._id)
+
+      return profile.save()
+    // })
+}
+
+UserSchema.methods.removeFollower = function(profile, user) {
+  // const profile = this;
+console.log(profile.followers)
+  // return User
+  //   // .count({followers: {$in: [profile.id]}})
+  //   .then(function(){
+      profile.followers.remove(user._id)
+
+      return profile.save()
+    // })
+}
+
+UserSchema.methods.updateFollowerCount = function(profile) {
+  // const user = this;
+  console.log(profile)
+  return User
+    .count({followers: {$in: [profile.id]}})
+    .then(function(count){
+      profile.followerCount = count;
+      console.log(profile.followers.length)
+      profile.followerCount = profile.followers.length
+      console.log(count)
+
+      return profile.save()
+    })
+}
+
+// PostSchema.methods.updateFavoriteCount = function() {
+//   const post = this;
 
 //   return User
-//     .count({followersCount: {$in: [user.id]}})
+//     .count({favorites: {$in: [post.id]}})
 //     .then(function(count){
-//       user.followersCount = count;
+//       post.favoritesCount = count;
 
-//       return user.save()
+//       return post.save()
 //     })
 // }
 

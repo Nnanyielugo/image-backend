@@ -29,6 +29,7 @@ module.exports.getProfile = (req, res, next) => {
 
 module.exports.followUser = (req, res, next) => {
   const profileId = req.profile._id;
+  const profile = req.profile;
 
   User
     .findById(req.payload.id)
@@ -36,14 +37,22 @@ module.exports.followUser = (req, res, next) => {
       if(!user) {return res.sendStatus(401)}
 
       return user.follow(profileId).then(() => {
-        return res.json({profile: req.profile.toProfileJSONFor(user)})
+        return user.addFollower(profile, user).then(() => {
+          return user.updateFollowerCount(profile).then(() => {
+            return res.json({profile: req.profile.toProfileJSONFor(user)})
+          })
+        })
       })
     })
     .catch(next)
 }
 
+// return req.post.updateFavoriteCount().then(post => {
+//   return res.json({post: post.toJSONFor(user)})
+
 module.exports.unfollowUser = (req, res, next) => {
   const profileId = req.profile._id;
+  const profile = req.profile
 
   User
     .findById(req.payload.id)
@@ -51,7 +60,11 @@ module.exports.unfollowUser = (req, res, next) => {
       if(!user) {return res.sendStatus(401);}
 
       return user.unfollow(profileId).then(() => {
-        return res.json({profile: req.profile.toProfileJSONFor(user)})
+        return user.removeFollower(profile, user).then(()=> {
+          return user.updateFollowerCount(profile).then(() => {
+            return res.json({profile: req.profile.toProfileJSONFor(user)})
+          })
+        })
       })
     })
     .catch(next)

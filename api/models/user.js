@@ -57,13 +57,12 @@ UserSchema.methods.generateJWT = function(){
 // generate json representation of user for authentication
 UserSchema.methods.toAuthJSON = function() {
   return {
+    id: this._id,
     username: this.username,
     email: this.email,
     token: this.generateJWT(),
     bio: this.bio,
     imageSrc: this.imageSrc,
-    favorites: this.favorites,
-    following: this.following
   }
 }
 
@@ -89,56 +88,25 @@ UserSchema.methods.favorite = function(id){
 }
 
 UserSchema.methods.addFollower = function(profile, user) {
-  // const profile = this;
-console.log(profile.followers)
-  // return User
-    // .count({followers: {$in: [profile.id]}})
-    // .then(function(){
-      profile.followers.unshift(user._id)
+  profile.followers.unshift(user._id)
 
-      return profile.save()
-    // })
+  return profile.save()
 }
 
 UserSchema.methods.removeFollower = function(profile, user) {
-  // const profile = this;
-console.log(profile.followers)
-  // return User
-  //   // .count({followers: {$in: [profile.id]}})
-  //   .then(function(){
-      profile.followers.remove(user._id)
+    profile.followers.remove(user._id)
 
-      return profile.save()
-    // })
+    return profile.save()
 }
 
 UserSchema.methods.updateFollowerCount = function(profile) {
-  // const user = this;
-  console.log(profile)
   return User
     .count({followers: {$in: [profile.id]}})
-    .then(function(count){
-      profile.followerCount = count;
-      console.log(profile.followers.length)
+    .then(function(){
       profile.followerCount = profile.followers.length
-      console.log(count)
-
       return profile.save()
     })
 }
-
-// PostSchema.methods.updateFavoriteCount = function() {
-//   const post = this;
-
-//   return User
-//     .count({favorites: {$in: [post.id]}})
-//     .then(function(count){
-//       post.favoritesCount = count;
-
-//       return post.save()
-//     })
-// }
-
 
 UserSchema.methods.unfavorite = function(id){
   this.favorites.remove(id);
@@ -153,6 +121,7 @@ UserSchema.methods.isFavorite = function(id) {
 
 UserSchema.methods.follow = function(id){
   // if index of user id is less then zero (ie, not exist), push id into 'following' array
+  // console.log(id)
   if(this.following.indexOf(id) === -1){
     this.following.unshift(id);
   }

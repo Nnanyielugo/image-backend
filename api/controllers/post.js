@@ -97,7 +97,7 @@ module.exports.createPosts = (req, res, next) => {
     .findById(req.payload.id)
     .then(user => {
       if(!user) {return res.sendStatus(401)}
-
+      // console.log(user)
       let path = null
       if(req.file) {
         path = req.file.path

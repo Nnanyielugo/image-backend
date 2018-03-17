@@ -3,6 +3,7 @@ const router = require('express').Router();
 router.use('/users', require('./users'));
 router.use('/posts', require('./posts'));
 router.use('/tags', require('./tags'));
+router.use('/profiles', require('./profiles'));
 
 // handle validation error messages
 router.use(function(err, req, res, next){

@@ -1,11 +1,29 @@
-const router = require('express').Router();
 const mongoose = require('mongoose');
 
 const Post = mongoose.model('post');
 const User = mongoose.model('user');
 const Comment = mongoose.model('comment');
 
+module.exports.preloadPostId = (req, res, next, slug) => {
+  Post.findOne({slug: slug})
+  .populate('author')
+  .then(post => {
+    if(!post) {return res.status(404).json({Message: "Post does not exist!"});}
+    // return res.status(200).json({Post: post})
+    req.post = post;
+    return next()
+  })
+  .catch(next)
+}
 
+module.exports.preloadCommentId = (req, res, next, id) => {
+  Comment.findById(id).then(function(comment){
+    if(!comment) { return res.status(404).json({Message: "Comment does not exist"}) ; }
+
+    req.comment = comment;
+    return next();
+  }).catch(next);
+}
 
 module.exports.getPosts = (req, res, next) => {
   let query = {};
@@ -208,6 +226,19 @@ module.exports.makeComment = (req, res, next) => {
       });      
     })
     .catch(next);
+}
+
+module.exports.deleteComment = (req, res, next) => {
+  if(req.comment.author.toString() === req.payload.id.toString()) {
+    req.post.comments.remove(req.comment._id);
+    req.post.save()
+      .then(Comment.find({_id: req.comment._id}).remove().exec())
+      .then(() => {
+        res.sendStatus(204);
+      });
+  } else {
+    res.sendStatus(403);
+  }
 }
 
 module.exports.favPost = (req, res, next) => {

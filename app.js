@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const passport = require('passport');
+const methods = require('methods')
+const methodOverride = require('method-override');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -23,6 +25,7 @@ app.use(logger('dev'));
 app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(methodOverride())
 app.use(cookieParser());
 
 // app.use(require('method-override')());

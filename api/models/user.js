@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
   imageSrc: String,
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'post' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
-  // followees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+  followersCount: {type: Number, default: 0},
   hash: String,
   salt: String
 }, {timestamps: true});
@@ -60,7 +60,9 @@ UserSchema.methods.toAuthJSON = function() {
     email: this.email,
     token: this.generateJWT(),
     bio: this.bio,
-    imageSrc: this.imageSrc
+    imageSrc: this.imageSrc,
+    favorites: this.favorites,
+    following: this.following
   }
 }
 
@@ -83,9 +85,22 @@ UserSchema.methods.favorite = function(id){
   return this.save();
 }
 
-UserSchema.methods.unfavorite = function(id) {
+// UserSchema.methods.updateFollowersCount = function() {
+//   const user = this;
+
+//   return User
+//     .count({followersCount: {$in: [user.id]}})
+//     .then(function(count){
+//       user.followersCount = count;
+
+//       return user.save()
+//     })
+// }
+
+
+UserSchema.methods.unfavorite = function(id){
   this.favorites.remove(id);
-  return this.save;
+  return this.save();
 }
 
 UserSchema.methods.isFavorite = function(id) {

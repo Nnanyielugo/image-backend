@@ -167,21 +167,79 @@ module.exports.deletePost = (req, res, next) => {
 
 module.exports.getComments = (req, res, next) => {
   // create a new resolved promise
-  Promise.resolve()
+  Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
     .then(user => {
       return req.post.populate({
         path: 'comments',
+        populate: {
+          path: 'author'
+        },
         options: {
           sort: {
             createdAt: 'desc'
           }
         }
       }).execPopulate()
-        .then(article => {
-          return res.json({comments: req.article.comments.map(comment => {
-            return comment
+        .then(post => {
+          return res.json({comments: req.post.comments.map(comment => {
+            return comment.toJSONFor(user)
           })})
         })
         .catch(next);
     })
+}
+
+module.exports.makeComment = (req, res, next) => {
+  User
+    .findById(req.payload.id)
+    .then(user => {
+      if(!user){return res.sendStatus(401);}
+
+      const comment = new Comment(req.body.comment);
+      comment.post = req.post;
+      comment.author = user;
+
+      return comment.save().then(() => {
+        req.post.comments.push(comment);
+
+        return req.post.save().then(() => {
+          res.json({comment: comment.toJSONFor(user)})
+        });
+      });      
+    })
+    .catch(next);
+}
+
+module.exports.favPost = (req, res, next) => {
+  const postId = req.post._id
+
+  User
+    .findById(req.payload.id)
+    .then(user => {
+      if(!user) {return res.sendStatus(410)}
+
+      return user.favorite(postId).then(() => {
+        return req.post.updateFavoriteCount().then(post => {
+          return res.json({post: post.toJSONFor(user)})
+        })
+      })
+    })
+    .catch(next);
+}
+
+module.exports.unfavPost = (req, res, next) => {
+  const postId = req.post._id;
+
+  User
+    .findById(req.payload.id)
+    .then(user  => {
+      if(!user){return res.sendStatus(401);}
+      
+      return user.unfavorite(postId).then(() => {
+        return req.post.updateFavoriteCount().then(post => {
+          return res.json({post: post.toJSONFor(user)})
+        })
+      })
+    })
+    .catch(next);
 }

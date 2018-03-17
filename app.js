@@ -25,6 +25,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 
+// app.use(require('method-override')());
+
 app.use('/api', api);
 
 

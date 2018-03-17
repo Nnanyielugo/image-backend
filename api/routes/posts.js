@@ -39,5 +39,9 @@ router.put('/:post', upload.single('imgSrc'), auth.required, post.updatePost);
 router.delete('/:post', auth.required, post.deletePost)
 
 router.get('/:post/comments', auth.optional, post.getComments);
+router.post('/:post/comments', auth.required, post.makeComment)
+
+router.post('/:post/favorite', auth.required, post.favPost)
+router.delete('/:post/favorite', auth.required, post.unfavPost)
 
 module.exports = router;

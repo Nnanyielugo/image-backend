@@ -7,5 +7,6 @@ const profiles = require('../controllers/profiles')
 router.param('username', profiles.preloadProfileId)
 router.get('/:username', auth.optional, profiles.getProfile)
 router.post('/:username/follow', auth.required, profiles.followUser)
+router.delete('/:username/follow', auth.required, profiles.unfollowUser)
 
 module.exports = router;

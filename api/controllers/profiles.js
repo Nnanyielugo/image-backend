@@ -41,3 +41,18 @@ module.exports.followUser = (req, res, next) => {
     })
     .catch(next)
 }
+
+module.exports.unfollowUser = (req, res, next) => {
+  const profileId = req.profile._id;
+
+  User
+    .findById(req.payload.id)
+    .then(user => {
+      if(!user) {return res.sendStatus(401);}
+
+      return user.unfollow(profileId).then(() => {
+        return res.json({profile: req.profile.toProfileJSONFor(user)})
+      })
+    })
+    .catch(next)
+}

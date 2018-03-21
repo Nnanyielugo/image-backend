@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
   salt: String
 }, {timestamps: true});
 
-UserSchema.plugin(uniqueValidator, {message: 'is already taken.'});
+UserSchema.plugin(uniqueValidator, {message: '{PATH} is already taken.'});
 
 // validate password
 UserSchema.methods.validPassword = function(password){

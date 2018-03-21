@@ -20,7 +20,7 @@ const PostSchema = new mongoose.Schema({
   tags: [String]
 }, {timestamps: true});
 
-PostSchema.plugin(uniqueValidator, {message: 'is already taken'});
+PostSchema.plugin(uniqueValidator, {errors: 'is already taken'});
 
 PostSchema.pre('validate', function(next) {
   if(!this.slug) {

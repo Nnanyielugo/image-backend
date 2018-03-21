@@ -8,7 +8,7 @@ module.exports.preloadPostId = (req, res, next, slug) => {
   Post.findOne({slug: slug})
   .populate('author')
   .then(post => {
-    if(!post) {return res.status(404).json({Message: "Post does not exist!"});}
+    if(!post) {return res.status(404).json({errors: {error: "Post does not exist!"}});}
     // return res.status(200).json({Post: post})
     req.post = post;
     return next()
@@ -18,7 +18,7 @@ module.exports.preloadPostId = (req, res, next, slug) => {
 
 module.exports.preloadCommentId = (req, res, next, id) => {
   Comment.findById(id).then(function(comment){
-    if(!comment) { return res.status(404).json({Message: "Comment does not exist"}) ; }
+    if(!comment) { return res.status(404).json({errors: {error: "Comment does not exist"}}) ; }
 
     req.comment = comment;
     return next();

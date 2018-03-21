@@ -37,7 +37,7 @@ module.exports.followUser = (req, res, next) => {
     .then(user => {
       if(!user) {return res.sendStatus(401)}
       if(user._id.toString() === profileId.toString()){
-        res.status(400).json({message: "You cannot follow yourself!"})
+        res.status(400).json({errors: {error: "You cannot follow yourself!"}})
       } else {
         return user.follow(profileId).then(() => {
           return user.addFollower(profile, user).then(() => {
@@ -60,7 +60,7 @@ module.exports.unfollowUser = (req, res, next) => {
     .then(user => {
       if(!user) {return res.sendStatus(401);}
       if(user._id.toString() === profileId.toString()){
-        res.status(400).json({message: "You cannot unfollow yourself!"})
+        res.status(400).json({message: {error: "You cannot unfollow yourself!"}})
       } else {
         return user.unfollow(profileId).then(() => {
           return user.removeFollower(profile, user).then(()=> {

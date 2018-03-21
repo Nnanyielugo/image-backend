@@ -15,7 +15,9 @@ module.exports.getUser = (req, res, next) => {
 
 module.exports.signUp = (req, res, next) => {
   const user = new User()
-
+  if(typeof req.file !== 'undefined'){
+    user.imageSrc = req.file.path;
+  }
   user.username = req.body.username;
   user.email = req.body.email;
   user.setPassword(req.body.password);
@@ -32,11 +34,11 @@ module.exports.login = (req, res, next) => {
   console.log(req.body)
   //console.log(req.payload)
   if(!req.body.user.email){
-    return res.status(422).json({errors: {email: "can't be blank"}});
+    return res.status(422).json({errors: {error: "Email can't be blank"}});
   }
 
   if(!req.body.user.password){
-    return res.status(422).json({errors: {password: "can't be blank"}});
+    return res.status(422).json({errors: {error: "Password can't be blank"}});
   }
 
   passport.authenticate('local', {session: false}, function(err, user, info){

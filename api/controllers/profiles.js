@@ -14,7 +14,7 @@ module.exports.preloadProfileId = (req, res, next, username) => {
 }
 
 module.exports.getProfile = (req, res, next) => {
-  if(req.payload.id) {
+  if(req.payload) {
     User
       .findById(req.payload.id)
       .then(user => {
@@ -30,7 +30,6 @@ module.exports.getProfile = (req, res, next) => {
 module.exports.followUser = (req, res, next) => {
   const profileId = req.profile._id;
   const profile = req.profile;
-  // console.log("[PAYLOAD]", req.payload)
 
   User
     .findById(req.payload.id)

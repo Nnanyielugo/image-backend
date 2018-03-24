@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
             match: [/\S+@\S+\.\S+/, 'is invalid'], 
             index: true},
   bio: String,
-  imageSrc: String,
+  imageSrc: {type: String, default: './uploads/placeholder.jpeg'},
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'post' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
   followers: [{type: String}],

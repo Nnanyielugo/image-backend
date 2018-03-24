@@ -6,14 +6,14 @@ const Comment = mongoose.model('comment');
 
 module.exports.preloadPostId = (req, res, next, slug) => {
   Post.findOne({slug: slug})
-  .populate('author')
-  .then(post => {
-    if(!post) {return res.status(404).json({errors: {error: "Post does not exist!"}});}
-    // return res.status(200).json({Post: post})
-    req.post = post;
-    return next()
-  })
-  .catch(next)
+    .populate('author')
+    .then(post => {
+      if(!post) {return res.status(404).json({errors: {error: "Post does not exist!"}});}
+      // return res.status(200).json({Post: post})
+      req.post = post;
+      return next()
+    })
+    .catch(next)
 }
 
 module.exports.preloadCommentId = (req, res, next, id) => {
@@ -26,7 +26,7 @@ module.exports.preloadCommentId = (req, res, next, id) => {
 }
 
 module.exports.getPosts = (req, res, next) => {
-  let query = {};
+  var query = {};
   let limit = 20;
   let offset = 0;
   if (typeof req.query.limit !== 'undefined') {
@@ -50,12 +50,14 @@ module.exports.getPosts = (req, res, next) => {
     req.query.author ? User.findOne({username: req.query.author}) : null,
     req.query.favorited ? User.findOne({username: req.query.favorited}) : null
   ]).then(results => {
-    // console.log("[RESULTS]: ", results)    
-    const author = results[0];
+    // console.log("[RESULTS]: ", results[0]._id)    
+    var author = results[0];
     const favoriter = results[1];
 
     if(author) {
       query.author = author._id;
+      console.log(query.author)
+      console.log(query)
     }
     
     if(favoriter) {
@@ -63,30 +65,30 @@ module.exports.getPosts = (req, res, next) => {
     } else if(req.query.favorited) {
       query._id = {$in: []}
     }
-  })
-  return Promise
-    .all([
-      Post
-        .find(query)
-        .limit(Number(limit))
-        .skip(Number(offset))
-        .sort({createdAt: 'desc'})
-        .populate('author')
-        .exec(), 
-      Post.count(query).exec(),
-      req.payload ? User.findById(req.payload.id): null,
-    ])
-    .then(results => {
-      // console.log(results)
-      const posts = results[0];
-      const postsCount = results[1];
-      const user = results[2];
+  
+    return Promise.all([
+        Post
+          .find(query)
+          .limit(Number(limit))
+          .skip(Number(offset))
+          .sort({createdAt: 'desc'})
+          .populate('author')
+          .exec(), 
+        Post.count(query).exec(),
+        req.payload ? User.findById(req.payload.id): null,
+      ])
+      .then(results => {
+        // console.log(results[0])
+        const posts = results[0];
+        const postsCount = results[1];
+        const user = results[2];
 
-      return res.json({
-        posts: posts.map(function(post){
-          return post.toJSONFor(user)
-        }),
-        postsCount: postsCount
+        return res.json({
+          posts: posts.map(function(post){
+            return post.toJSONFor(user)
+          }),
+          postsCount: postsCount
+        })
       })
     })
     .catch(next)
@@ -152,7 +154,7 @@ module.exports.updatePost = (req, res, next) => {
           req.post.tags = req.body.tags
         }
 
-        if(typeof req.file.path !== 'undefined'){
+        if(typeof req.file !== 'undefined'){
           req.post.imgSrc = req.file.path;
         }
 
@@ -242,12 +244,12 @@ module.exports.deleteComment = (req, res, next) => {
 }
 
 module.exports.favPost = (req, res, next) => {
-  const postId = req.post._id
+  const postId = req.post._id;
 
   User
     .findById(req.payload.id)
     .then(user => {
-      if(!user) {return res.sendStatus(410)}
+      if(!user){return res.sendStatus(401);}
 
       return user.favorite(postId).then(() => {
         return req.post.updateFavoriteCount().then(post => {
@@ -260,6 +262,7 @@ module.exports.favPost = (req, res, next) => {
 
 module.exports.unfavPost = (req, res, next) => {
   const postId = req.post._id;
+  console.log(req.payload)
 
   User
     .findById(req.payload.id)

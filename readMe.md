@@ -1,4 +1,4 @@
-TODO:
-Make user unable to follow self --- done
-Unfollow --- done
-Get list of followers --- done(kinda)
+### TODO:
+[x] make user unable to follow self
+[x] unfollow
+[x] get list of followers
